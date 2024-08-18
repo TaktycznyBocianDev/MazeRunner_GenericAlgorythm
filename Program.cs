@@ -1,4 +1,5 @@
-﻿using Raylib_cs;
+﻿using MazeRunnerGenericAlg;
+using Raylib_cs;
 using System;
 using System.Collections.Generic;
 
@@ -24,11 +25,11 @@ class Program
         // Initialize blocks, target, and player for the first time
         List<Block> blocks;
         Target target;
-        Player player;
-        InitializeGame(out blocks, out target, out player);
+        Player[] players;
+        InitializeGame(out blocks, out target, out players);
 
         // Function to initialize blocks, target, and player
-        void InitializeGame(out List<Block> blocks, out Target target, out Player player)
+        void InitializeGame(out List<Block> blocks, out Target target, out Player[] players)
         {
             // Create a list to store blocks
             blocks = new List<Block>();
@@ -46,8 +47,14 @@ class Program
             // Create a target ensuring it doesn't overlap with any block
             target = new Target(gridRows, gridCols, cellSize, blocks);
 
+            DNA dna = new DNA(['a']);
+
             // Initialize the player ensuring it doesn't overlap with any block
-            player = new Player(gridRows, gridCols, cellSize, blocks);
+            players =
+            [
+                new Player(gridRows, gridCols, cellSize, blocks, dna, new Player.StartingPos(1,1)),
+                new Player(gridRows, gridCols, cellSize, blocks, dna, new Player.StartingPos(1,1)),
+            ];
         }
 
         // Main game loop
@@ -56,11 +63,15 @@ class Program
             // Check for 'R' key press to restart the game
             if (Raylib.IsKeyPressed(KeyboardKey.R))
             {
-                InitializeGame(out blocks, out target, out player);
+                InitializeGame(out blocks, out target, out players);
             }
 
             // Update player movement
-            player.Update(blocks, target, screenWidth, screenHeight);
+            foreach(Player player in players)
+            {
+                player.Update(blocks, target, screenWidth, screenHeight);
+            }
+            
 
             // Start drawing
             Raylib.BeginDrawing();
@@ -91,8 +102,11 @@ class Program
             target.Draw();
 
             // Draw the player
-            player.Draw();
-
+            foreach (Player player in players)
+            {
+                player.Draw();
+            }
+            
             // End drawing
             Raylib.EndDrawing();
         }
