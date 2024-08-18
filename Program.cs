@@ -4,17 +4,28 @@ using System.Collections.Generic;
 
 class Program
 {
+
+    /// <summary>
+    /// This program generate level - grid with obstacles, player and target. Grid size is modified by seting screen 
+    /// size and size of cells.
+    /// </summary>
     static void Main()
     {
         // Initialize the Raylib window
         int screenWidth = 800;
         int screenHeight = 800;
-        Raylib.InitWindow(screenWidth, screenHeight, "2D Grid with Blocks, Target, and Player");
+        Raylib.InitWindow(screenWidth, screenHeight, "Kirunia's treat");
 
         // Define grid dimensions based on screen size and cell size
         int cellSize = 50; // Size of each cell
         int gridRows = screenHeight / cellSize;
-        int gridCols = screenWidth / cellSize;
+        int gridCols = screenWidth / cellSize;     
+
+        // Initialize blocks, target, and player for the first time
+        List<Block> blocks;
+        Target target;
+        Player player;
+        InitializeGame(out blocks, out target, out player);
 
         // Function to initialize blocks, target, and player
         void InitializeGame(out List<Block> blocks, out Target target, out Player player)
@@ -38,12 +49,6 @@ class Program
             // Initialize the player ensuring it doesn't overlap with any block
             player = new Player(gridRows, gridCols, cellSize, blocks);
         }
-
-        // Initialize blocks, target, and player for the first time
-        List<Block> blocks;
-        Target target;
-        Player player;
-        InitializeGame(out blocks, out target, out player);
 
         // Main game loop
         while (!Raylib.WindowShouldClose()) // Detect window close button or ESC key
