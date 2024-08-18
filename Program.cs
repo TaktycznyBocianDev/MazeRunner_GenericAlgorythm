@@ -1,50 +1,98 @@
 ﻿using Raylib_cs;
-using System.Numerics;
+using System;
+using System.Collections.Generic;
 
 class Program
 {
     static void Main()
     {
         // Initialize the Raylib window
-        Raylib.InitWindow(800, 600, "Raylib Grid Example");
+        int screenWidth = 800;
+        int screenHeight = 800;
+        Raylib.InitWindow(screenWidth, screenHeight, "2D Grid with Blocks, Target, and Player");
 
-        // Set the camera mode to be free (you can move the camera around)
-        Camera3D camera = new Camera3D();
-        camera.Position = new Vector3(10.0f, 10.0f, 10.0f); // Camera position
-        camera.Target = new Vector3(0.0f, 0.0f, 0.0f);      // Camera looking at point
-        camera.Up = new Vector3(0.0f, 1.0f, 0.0f);          // Camera up vector (rotation towards target)
-        camera.FovY = 45.0f;                                // Camera field-of-view Y
-        //camera.type = CameraType.CAMERA_PERSPECTIVE;        // Camera mode type
+        // Define grid dimensions based on screen size and cell size
+        int cellSize = 100; // Size of each cell
+        int gridRows = screenHeight / cellSize;
+        int gridCols = screenWidth / cellSize;
 
-        //Raylib.SetCameraMode(camera, CameraMode.CAMERA_FREE); // Set a free camera mode
+        // Function to initialize blocks, target, and player
+        void InitializeGame(out List<Block> blocks, out Target target, out Player player)
+        {
+            // Create a list to store blocks
+            blocks = new List<Block>();
+
+            // Number of blocks to create
+            int blockCount = 10;
+
+            // Initialize blocks
+            for (int i = 0; i < blockCount; i++)
+            {
+                Block block = new Block(gridRows, gridCols, cellSize, blocks);
+                blocks.Add(block);
+            }
+
+            // Create a target ensuring it doesn't overlap with any block
+            target = new Target(gridRows, gridCols, cellSize, blocks);
+
+            // Initialize the player
+            player = new Player(gridRows, gridCols, cellSize, screenWidth, screenHeight);
+        }
+
+        // Initialize blocks, target, and player for the first time
+        List<Block> blocks;
+        Target target;
+        Player player;
+        InitializeGame(out blocks, out target, out player);
 
         // Main game loop
         while (!Raylib.WindowShouldClose()) // Detect window close button or ESC key
         {
-            // Update the camera
-            Raylib.UpdateCamera(ref camera, CameraMode.Free);
+            // Check for 'R' key press to restart the game
+            if (Raylib.IsKeyPressed(KeyboardKey.R))
+            {
+                InitializeGame(out blocks, out target, out player);
+            }
+
+            // Update player movement
+            player.Update(blocks, target, screenWidth, screenHeight);
 
             // Start drawing
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.RayWhite);
 
-            // Begin 3D mode drawing
-            Raylib.BeginMode3D(camera);
+            // Draw the grid
+            for (int row = 0; row < gridRows; row++)
+            {
+                for (int col = 0; col < gridCols; col++)
+                {
+                    // Calculate the position of each cell
+                    int x = col * cellSize;
+                    int y = row * cellSize;
 
-            // Draw the grid - parameters are slices and spacing
-            Raylib.DrawGrid(20, 1.0f);
+                    // Draw the cell as a white square with a black border
+                    Raylib.DrawRectangle(x, y, cellSize, cellSize, Color.White);
+                    Raylib.DrawRectangleLines(x, y, cellSize, cellSize, Color.Black);
+                }
+            }
 
-            // End 3D mode drawing
-            Raylib.EndMode3D();
+            // Draw the blocks
+            foreach (var block in blocks)
+            {
+                block.Draw();
+            }
 
-            // Display some text
-            Raylib.DrawText("Move the camera with arrow keys or WASD", 10, 10, 20, Color.DarkGray);
+            // Draw the target
+            target.Draw();
+
+            // Draw the player
+            player.Draw();
 
             // End drawing
             Raylib.EndDrawing();
         }
 
-        // De-initialize the Raylib window
+        // De-initialize Raylib window
         Raylib.CloseWindow();
     }
 }
