@@ -7,25 +7,41 @@ class Player
     private int size; // Size of the player
     private Color color; // Color of the player
     private int cellSize; // Size of each grid cell
-    private int screenWidth;
-    private int screenHeight;
 
     // Constructor
-    public Player(int gridRows, int gridCols, int cellSize, int sWidth, int sHeight)
+    public Player(int gridRows, int gridCols, int cellSize, List<Block> blocks)
     {
-        screenWidth = sWidth;
-        screenHeight = sHeight;
-
         // Initialize player's size and color
         size = (int)(cellSize * 0.75); // 3/4 of the cell size
         color = Color.Red;
         this.cellSize = cellSize;
 
-        // Start player in the center of the grid
-        x = gridCols / 2 * cellSize + (cellSize - size) / 2;
-        y = gridRows / 2 * cellSize + (cellSize - size) / 2;
-    }
+        // Start player in the center of the grid, ensuring it's not on a block
+        bool positionFound = false;
+        Random random = new Random();
 
+        while (!positionFound)
+        {
+            // Randomly choose a position in the grid
+            int startRow = random.Next(0, gridRows);
+            int startCol = random.Next(0, gridCols);
+
+            // Center the player in the chosen cell
+            x = startCol * cellSize + (cellSize - size) / 2;
+            y = startRow * cellSize + (cellSize - size) / 2;
+
+            // Check if the chosen position collides with any block
+            positionFound = true;
+            foreach (var block in blocks)
+            {
+                if (block.IsCollidingWithPlayer(x, y, size))
+                {
+                    positionFound = false;
+                    break;
+                }
+            }
+        }
+    }
 
     // Update the player's position based on input and check for collisions
     public void Update(List<Block> blocks, Target target, int screenWidth, int screenHeight)

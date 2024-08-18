@@ -2,9 +2,13 @@
 using System;
 using System.Collections.Generic;
 
-class Program
+class ProgramSingle
 {
-    static void Main()
+
+    /// <summary>
+    /// This is version for one player - as a safe copy
+    /// </summary>
+    static void MainSingle()
     {
         // Initialize the Raylib window
         int screenWidth = 800;
