@@ -8,7 +8,13 @@ public class Target
     private int radius; // Radius of the target
     private Color color; // Color of the target
 
-    // Constructor
+    /// <summary>
+    /// Creates new target in random place
+    /// </summary>
+    /// <param name="gridRows"></param>
+    /// <param name="gridCols"></param>
+    /// <param name="cellSize"></param>
+    /// <param name="blocks"></param>
     public Target(int gridRows, int gridCols, int cellSize, List<Block> blocks)
     {
         // Initialize target's size and color
@@ -39,14 +45,10 @@ public class Target
             }
         }
     }
-
-    // Draw the target
     public void Draw()
     {
         Raylib.DrawCircle(x, y, radius, color);
-    }
-
-    // Check if the player collides with the target
+    }  
     public bool IsCollidingWithPlayer(int playerX, int playerY, int playerSize)
     {
         int dx = x - playerX;
@@ -55,6 +57,5 @@ public class Target
         int combinedRadius = radius + playerSize / 2;
         return distanceSquared <= combinedRadius * combinedRadius;
     }
-
     public Vector2 GetCurrentPosition() { return new Vector2(x, y); }
 }

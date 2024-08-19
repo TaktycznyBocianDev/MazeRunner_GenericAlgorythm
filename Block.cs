@@ -7,7 +7,13 @@ public class Block
     private int size; // Size of the block
     private Color color; // Color of the block
 
-    // Constructor
+    /// <summary>
+    /// Creates new block - obstacle - on random places. Each block is in unique position.
+    /// </summary>
+    /// <param name="gridRows"></param>
+    /// <param name="gridCols"></param>
+    /// <param name="cellSize"></param>
+    /// <param name="existingBlocks"></param>
     public Block(int gridRows, int gridCols, int cellSize, List<Block> existingBlocks)
     {
         // Initialize block's size and color
@@ -38,20 +44,14 @@ public class Block
             }
         }
     }
-
-    // Check if this block occupies the given grid cell
     public bool IsOccupying(int targetX, int targetY)
     {
         return x == targetX && y == targetY;
     }
-
-    // Check if the player collides with this block
     public bool IsCollidingWithPlayer(int playerX, int playerY, int playerSize)
     {
         return playerX < x + size && playerX + playerSize > x && playerY < y + size && playerY + playerSize > y;
     }
-
-    // Draw the block
     public void Draw()
     {
         Raylib.DrawRectangle(x, y, size, size, color);

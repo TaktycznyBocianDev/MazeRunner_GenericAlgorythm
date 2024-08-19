@@ -15,7 +15,15 @@ public class Player
     private Color color; // Color of the player
     private int cellSize; // Size of each grid cell
 
-    // Constructor
+    /// <summary>
+    /// Creates new player with DNA and in concrete position
+    /// </summary>
+    /// <param name="gridRows"></param>
+    /// <param name="gridCols"></param>
+    /// <param name="cellSize"></param>
+    /// <param name="blocks"></param>
+    /// <param name="dna"></param>
+    /// <param name="startingPos"></param>
     public Player(int gridRows, int gridCols, int cellSize, List<Block> blocks, DNA dna, Vector2 startingPos)
     {
         playerDNA = dna;
@@ -51,7 +59,13 @@ public class Player
         }
     }
 
-    // Update the player's position based on input and check for collisions 
+    /// <summary>
+    /// Updates player position, using DNA as template for movements. Checks collisions.
+    /// </summary>
+    /// <param name="blocks"></param>
+    /// <param name="target"></param>
+    /// <param name="screenWidth"></param>
+    /// <param name="screenHeight"></param>
     public void Update(List<Block> blocks, Target target, int screenWidth, int screenHeight)
     {
         int oldX = x;
@@ -103,16 +117,12 @@ public class Player
             // You can trigger a win state here
         }      
     }
-
-    // Draw the player
     public void Draw()
     {
         Raylib.DrawRectangle(x, y, size, size, color);
         // Later, you can replace this with a DrawTexture call if you want to use a PNG texture for the player
     }
-
     public Vector2 GetCurrentPosition() { return new Vector2(x, y); }
-
     private static Color GetRandomColor()
     {
         // Create a random number generator
