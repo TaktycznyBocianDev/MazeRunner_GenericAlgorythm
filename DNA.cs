@@ -34,17 +34,20 @@ namespace MazeRunnerGenericAlg
         }
 
         /// <summary>
-        /// Fitness calculated by distance between player and target. If DNA seqence is longer that set max, fitness is "maximal".
+        /// Fitness calculated by distance between player and target. Additionally, approaching to target is taken into consideration".
         /// </summary>
         /// <param name="player"></param>
         /// <param name="target"></param>
         /// <param name="maxDnaLenght"></param>
         public void CalculateFitness(Player player, Target target, int maxDnaLenght)
         {
-            if (genes.Count > maxDnaLenght) {fitness = int.MaxValue; return; }
             float distance = CalculateDistance(player.GetCurrentPosition().X, player.GetCurrentPosition().Y, target.GetCurrentPosition().X, target.GetCurrentPosition().Y);
             fitness = (int)distance;
-            if (player.victory) fitness += 100; //Penalty for winning, and then escaping (if win occured, there is no more fitness anyway)
+
+            if (player.Victory) fitness += 100; //Penalty for winning, and then escaping (if win occured, there is no more fitness anyway)
+            fitness += player.DistanceGain;
+
+            if(fitness <= 0) fitness = int.MaxValue;
         }
 
         /// <summary>

@@ -19,14 +19,14 @@ class Program
         const int SCREENWIDTH = 1800;
         const int SCREENHEIGHT = 900;
         const int CELLSIZE = 50;
-        const int BLOCKCOUNT = 25;
+        const int BLOCKCOUNT = 10;
         const double MUTATIONRATE = 0.01;
         const double EVOLUTIONRATE = 0.95;
-        const int MAXPOPULATION = 30;
-        const int MAXGENECOUNT = 350;
+        const int MAXPOPULATION = 20;
+        const int MAXGENECOUNT = 2000;
         const int STARTGENECOUNT = 16;
-        const float WAITTIMEINSEC = 0.02f;
-        const float MATERANGE = 1.4f;
+        const float MATERANGE = 1.7f;
+        const float WAITTIMEINSEC = 0.01f;
         Vector2 STARTPOSITION = new Vector2(0, 0);
         Vector2 TARGETPOSITION = new Vector2((SCREENWIDTH - 50)/CELLSIZE, (SCREENHEIGHT - 50)/CELLSIZE);
         const bool USETARGETPOSITION = true;
@@ -80,7 +80,7 @@ class Program
         }
 
         // Function to initialize blocks, target, and player
-        Player winner = new Player(gridRows, gridCols, CELLSIZE, blocks, new DNA(GENEPOOL, STARTGENECOUNT), STARTPOSITION);
+        Player winner = new Player(gridRows, gridCols, CELLSIZE, blocks, new DNA(GENEPOOL, STARTGENECOUNT), STARTPOSITION, target);
         bool isWinnerSet = false;
         bool stopDravingPlayers = false;
 
@@ -168,19 +168,19 @@ class Program
                     {
                         if (!isWinnerSet)
                         {
-                            winner = new Player(gridRows, gridCols, CELLSIZE, blocks, victoryDNA, STARTPOSITION);
+                            winner = new Player(gridRows, gridCols, CELLSIZE, blocks, victoryDNA, STARTPOSITION, target);
                             isWinnerSet = true;
                             stopDravingPlayers = true;
-                            winner.victory = false;
+                            winner.Victory = false;
                         }
                         else
                         {
                             winner.Update(blocks, target, SCREENWIDTH, SCREENHEIGHT);
                             winner.Draw(0);
-                            if (winner.victory) isWinnerSet = false;
+                            if (winner.Victory) isWinnerSet = false;
                             Raylib.WaitTime(WAITTIMEINSEC);
                         }
-                        DrawInfo(winner.playerDNA, generationsCounter);
+                        DrawInfo(winner.PlayerDNA, generationsCounter);
 
                     }
 
@@ -209,25 +209,25 @@ class Program
         for (int i = 0; i < playersPopulation.population.Length; i++)
         {
             Player player = playersPopulation.population[i];
-            Console.WriteLine(player.ToString(i));
-            averageFitness += player.playerDNA.fitness;
-            averageDnaLenght += player.playerDNA.genes.Count;
+            Console.WriteLine(i.ToString() + "" + player.ToString());
+            averageFitness += player.PlayerDNA.fitness;
+            averageDnaLenght += player.PlayerDNA.genes.Count;
 
             if (bestFitness == 0)
             {
-                bestFitness = player.playerDNA.fitness;
+                bestFitness = player.PlayerDNA.fitness;
             }
-            if (bestFitness != 0 && player.playerDNA.fitness < bestFitness)
+            if (bestFitness != 0 && player.PlayerDNA.fitness < bestFitness)
             {
-                bestFitness = player.playerDNA.fitness;
+                bestFitness = player.PlayerDNA.fitness;
             }
         }
         averageFitness /= playersPopulation.population.Length;
         averageDnaLenght /= playersPopulation.population.Length;
-        Console.WriteLine("Current generation: " + generationsCounter.ToString());
         Console.WriteLine("Best fitness: " + bestFitness.ToString());
         Console.WriteLine("Average fitness: " + averageFitness.ToString());
         Console.WriteLine("Average DNA lenght: " + averageDnaLenght.ToString());
+        Console.WriteLine("Current generation: " + generationsCounter.ToString());
     }
 
     static public void DrawInfo(DNA bestDNA, int generationsCounter)

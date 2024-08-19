@@ -73,7 +73,7 @@ namespace MazeRunnerGenericAlg
         {
             for (int i = 0; i < maxPopulation; i++)
             {
-                population[i] = new Player(gridRows, gridCols, cellSize, blocks, new DNA(genePool, startGenesCount), startingPos);               
+                population[i] = new Player(gridRows, gridCols, cellSize, blocks, new DNA(genePool, startGenesCount), startingPos, target);               
             }
         }
 
@@ -85,7 +85,7 @@ namespace MazeRunnerGenericAlg
         {
             foreach (Player player in population)
             {
-                player.playerDNA.CalculateFitness(player, target, maxGenesCount);
+                player.PlayerDNA.CalculateFitness(player, target, maxGenesCount);
             }
         }
 
@@ -101,9 +101,9 @@ namespace MazeRunnerGenericAlg
             foreach (Player player in population)
             {
 
-                if (player.playerDNA.fitness < bestFitness)
+                if (player.PlayerDNA.fitness < bestFitness)
                 {
-                    bestFitness = player.playerDNA.fitness;
+                    bestFitness = player.PlayerDNA.fitness;
                 }
             }
 
@@ -111,7 +111,7 @@ namespace MazeRunnerGenericAlg
 
             foreach (Player player in population)
             {
-                if (player.playerDNA.fitness <= maxRange)
+                if (player.PlayerDNA.fitness <= maxRange)
                 {
                     matingPool.Add(player);
                 }
@@ -130,20 +130,20 @@ namespace MazeRunnerGenericAlg
             Player parentTres = matingPool[rnd.Next(matingPool.Count)];
             Player parentQuatro = matingPool[rnd.Next(matingPool.Count)];
 
-            int countUno = parentUno.playerDNA.genes.Count / 4;
-            int countDos = parentDos.playerDNA.genes.Count / 4;
-            int countTres = parentTres.playerDNA.genes.Count / 4;
-            int countQuatro = parentQuatro.playerDNA.genes.Count / 4;
+            int countUno = parentUno.PlayerDNA.genes.Count / 4;
+            int countDos = parentDos.PlayerDNA.genes.Count / 4;
+            int countTres = parentTres.PlayerDNA.genes.Count / 4;
+            int countQuatro = parentQuatro.PlayerDNA.genes.Count / 4;
 
             List<char> finalSequence = new List<char>();
 
-            finalSequence.AddRange(parentUno.playerDNA.genes.Take(countUno));
+            finalSequence.AddRange(parentUno.PlayerDNA.genes.Take(countUno));
 
-            finalSequence.AddRange(parentDos.playerDNA.genes.Skip(countDos).Take(countDos));
+            finalSequence.AddRange(parentDos.PlayerDNA.genes.Skip(countDos).Take(countDos));
 
-            finalSequence.AddRange(parentTres.playerDNA.genes.Skip(2 * countTres).Take(countTres));
+            finalSequence.AddRange(parentTres.PlayerDNA.genes.Skip(2 * countTres).Take(countTres));
 
-            finalSequence.AddRange(parentQuatro.playerDNA.genes.Skip(3 * countQuatro).Take(countQuatro));
+            finalSequence.AddRange(parentQuatro.PlayerDNA.genes.Skip(3 * countQuatro).Take(countQuatro));
 
             DNA newDNA = new DNA(finalSequence);
             newDNA.Mutate(mutationRate, genePool, new Random());
@@ -169,7 +169,7 @@ namespace MazeRunnerGenericAlg
 
             for (int i = 0; i < maxPopulation; i++)
             {
-                population[i] = new Player(gridRows, gridCols, cellSize, blocks, CrossMutationDNA(), startingPos);
+                population[i] = new Player(gridRows, gridCols, cellSize, blocks, CrossMutationDNA(), startingPos, target);
             }
         }
 
@@ -182,7 +182,7 @@ namespace MazeRunnerGenericAlg
             int tmp = 0; //I assume there is still movement, so there are no finished players
             foreach (Player player in population)
             {
-                if (player.endOfMovement) tmp++; //For each player that ends movement, add one more to counter
+                if (player.EndOfMovement) tmp++; //For each player that ends movement, add one more to counter
             }
             if (tmp != population.Length) return false; //If any player still moves, return false, as movement is not finished.
             return true; //if all ends
@@ -197,9 +197,9 @@ namespace MazeRunnerGenericAlg
         {
             foreach (Player player in population)
             {
-                if (player.victory)
+                if (player.Victory)
                 {
-                    dna = player.playerDNA;
+                    dna = player.PlayerDNA;
                     return true;
                 }
                     
@@ -213,7 +213,7 @@ namespace MazeRunnerGenericAlg
             float tmp = 0;
             foreach (Player player in population)
             {
-                tmp += player.playerDNA.fitness;
+                tmp += player.PlayerDNA.fitness;
             }
             return tmp / population.Length;
 
@@ -224,7 +224,7 @@ namespace MazeRunnerGenericAlg
             float tmp = 0;
             foreach (Player player in population)
             {
-                tmp += player.playerDNA.genes.Count;
+                tmp += player.PlayerDNA.genes.Count;
             }
             return tmp / population.Length;
         }
@@ -236,11 +236,11 @@ namespace MazeRunnerGenericAlg
             {
                 if (bestFitness == 0)
                 {
-                    bestFitness = player.playerDNA.fitness;
+                    bestFitness = player.PlayerDNA.fitness;
                 }
-                if (bestFitness != 0 && player.playerDNA.fitness < bestFitness)
+                if (bestFitness != 0 && player.PlayerDNA.fitness < bestFitness)
                 {
-                    bestFitness = player.playerDNA.fitness;
+                    bestFitness = player.PlayerDNA.fitness;
                 }
             }
             return bestFitness;
