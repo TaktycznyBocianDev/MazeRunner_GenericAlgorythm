@@ -2,20 +2,13 @@
 using Raylib_cs;
 using System.Numerics;
 
-class Player
+public class Player
 {
     public DNA playerDNA;
-    public class StartingPos
-    {
-        public int x = 1, y = 1;
+    public Vector2 startingPos;
+    public bool endOfMovement;
 
-        public StartingPos(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
+    private int dnaIterator = 0;
     private int x; // X position in pixels
     private int y; // Y position in pixels
     private int size; // Size of the player
@@ -23,51 +16,65 @@ class Player
     private int cellSize; // Size of each grid cell
 
     // Constructor
-    public Player(int gridRows, int gridCols, int cellSize, List<Block> blocks, DNA dna, StartingPos startingPos)
+    public Player(int gridRows, int gridCols, int cellSize, List<Block> blocks, DNA dna, Vector2 startingPos)
     {
         playerDNA = dna;
+        dnaIterator = 0;
+        endOfMovement = false;
 
         // Initialize player's size and random color
         size = (int)(cellSize * 0.75);
         color = GetRandomColor();
         this.cellSize = cellSize;
 
-        // Start player in the center of the grid, ensuring it's not on a block
+        // Start player in the center of the grid, ensuring it's not on a block      
         bool positionFound = false;
-        Random random = new Random();
 
         while (!positionFound)
         {
             // Center the player in the starting cell
-            x = startingPos.x * cellSize + (cellSize - size) / 2;
-            y = startingPos.y * cellSize + (cellSize - size) / 2;
+            x = (int)startingPos.X * cellSize + (cellSize - size) / 2;
+            y = (int)startingPos.Y * cellSize + (cellSize - size) / 2;
 
-            // Check if the chosen position collides with any block, if yes - move player starting position
+            // Check if the chosen position collides with any block, if collides - move player starting position
             positionFound = true;
             foreach (var block in blocks)
             {
                 if (block.IsCollidingWithPlayer(x, y, size))
                 {
                     positionFound = false;
-                    startingPos.x++;
-                    startingPos.y++;
+                    startingPos.X++;
+                    startingPos.Y++;
                     break;
                 }
             }
         }
     }
 
-    // Update the player's position based on input and check for collisions
+    // Update the player's position based on input and check for collisions 
     public void Update(List<Block> blocks, Target target, int screenWidth, int screenHeight)
     {
         int oldX = x;
         int oldY = y;
 
-        // Move player based on WASD keys, one cell at a time
-        if (Raylib.IsKeyPressed(KeyboardKey.W)) y -= cellSize; // Up
-        if (Raylib.IsKeyPressed(KeyboardKey.S)) y += cellSize; // Down
-        if (Raylib.IsKeyPressed(KeyboardKey.A)) x -= cellSize; // Left
-        if (Raylib.IsKeyPressed(KeyboardKey.D)) x += cellSize; // Right
+        if (dnaIterator >= playerDNA.genes.Count)
+        {
+            endOfMovement = true;
+        }
+        else
+        {
+            // Get the next move character
+            char move = playerDNA.genes[dnaIterator];
+
+            // Perform movement based on the DNA character
+            if (move == 'W') y -= cellSize; // Up
+            if (move == 'S') y += cellSize; // Down
+            if (move == 'A') x -= cellSize; // Left
+            if (move == 'D') x += cellSize; // Right
+
+            // Increment the iterator for the next movement
+            dnaIterator++;
+        }
 
         // Ensure the player stays within the grid boundaries
         x = Math.Clamp(x, 0, screenWidth - size);
@@ -94,7 +101,7 @@ class Player
         {
             Console.WriteLine("You won!"); // Placeholder action
             // You can trigger a win state here
-        }
+        }      
     }
 
     // Draw the player
@@ -104,7 +111,9 @@ class Player
         // Later, you can replace this with a DrawTexture call if you want to use a PNG texture for the player
     }
 
-    public static Color GetRandomColor()
+    public Vector2 GetCurrentPosition() { return new Vector2(x, y); }
+
+    private static Color GetRandomColor()
     {
         // Create a random number generator
         Random random = new Random();

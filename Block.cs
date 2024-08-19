@@ -1,6 +1,6 @@
 ﻿using Raylib_cs;
 
-class Block
+public class Block
 {
     public int x; // X position in pixels
     public int y; // Y position in pixels

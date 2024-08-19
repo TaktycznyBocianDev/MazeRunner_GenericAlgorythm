@@ -8,18 +8,82 @@ namespace MazeRunnerGenericAlg
 {
     public class DNA
     {
-
-        public char[] chars;
+        public List<char> genes = new List<char>();
         public int fitness = 0;
 
-        public DNA(char[] chars)
+        /// <summary>
+        /// Constructor for creating new random DNA with definied lenght
+        /// </summary>
+        /// <param name="genePool"></param>
+        /// <param name="initialDnaLenght"></param>
+        public DNA(string genePool, int initialDnaLenght)
         {
-            this.chars = chars;
+            for (int i = 0; i < initialDnaLenght; i++)
+            {
+                genes.Add(GetRandomCharacter(genePool, new Random()));
+            }
         }
 
-        public override string ToString()
+        /// <summary>
+        /// Constructor for creating DNA from pre existing list of chars
+        /// </summary>
+        /// <param name="chars"></param>
+        public DNA(List<char> chars)
         {
-            return new string(chars) + " Fitness: " + fitness;
+            this.genes = chars;
+        }
+
+        /// <summary>
+        /// Fitness calculated by distance between player and target. If DNA seqence is longer that set max, fitness is "maximal".
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="target"></param>
+        /// <param name="maxDnaLenght"></param>
+        public void CalculateFitness(Player player, Target target, int maxDnaLenght)
+        {
+            if (genes.Count > maxDnaLenght) {fitness = int.MaxValue; return; }
+            float distance = CalculateDistance(player.GetCurrentPosition().X, player.GetCurrentPosition().Y, target.GetCurrentPosition().X, target.GetCurrentPosition().Y);
+            fitness = (int)distance;
+        }
+
+        /// <summary>
+        /// Changes gene in dna, according to mutation rate.
+        /// </summary>
+        /// <param name="mutationRate"></param>
+        /// <param name="genePool"></param>
+        /// <param name="rnd"></param>
+        public void Mutate(double mutationRate, string genePool, Random rnd)
+        {
+            for (int i = 0; i < genes.Count; i++)
+            {
+                if (rnd.NextDouble() < mutationRate)
+                {
+                    genes[i] = GetRandomCharacter(genePool, new Random());
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Add new gene to dna sequence if dna is no longer than max DNA lenght
+        /// </summary>
+        /// <param name="genePool"></param>
+        /// <param name="maxDnaLenght"></param>
+        public void ProlongDNA(string genePool, int maxDnaLenght)
+        {
+            if (!(genes.Count > maxDnaLenght)) genes.Add(GetRandomCharacter(genePool, new Random()));
+        }
+
+        private char GetRandomCharacter(string text, Random rng)
+        {
+            int index = rng.Next(text.Length);
+            return text[index];
+        }
+        private float CalculateDistance(float x1, float y1, float x2, float y2)
+        {
+            float dx = x2 - x1;
+            float dy = y2 - y1;
+            return MathF.Sqrt(dx * dx + dy * dy);
         }
     }
 }

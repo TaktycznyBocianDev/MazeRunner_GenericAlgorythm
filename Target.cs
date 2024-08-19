@@ -1,6 +1,7 @@
 ﻿using Raylib_cs;
+using System.Numerics;
 
-class Target
+public class Target
 {
     private int x; // X position in pixels
     private int y; // Y position in pixels
@@ -54,4 +55,6 @@ class Target
         int combinedRadius = radius + playerSize / 2;
         return distanceSquared <= combinedRadius * combinedRadius;
     }
+
+    public Vector2 GetCurrentPosition() { return new Vector2(x, y); }
 }

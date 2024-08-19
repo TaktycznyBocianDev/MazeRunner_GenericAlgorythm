@@ -2,6 +2,7 @@
 using Raylib_cs;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 class Program
 {
@@ -47,13 +48,19 @@ class Program
             // Create a target ensuring it doesn't overlap with any block
             target = new Target(gridRows, gridCols, cellSize, blocks);
 
-            DNA dna = new DNA(['a']);
+            DNA dna1 = new DNA("ADSW", 10);
+            DNA dna2 = new DNA("ADSW", 15);
+            DNA dna3 = new DNA("ADSW", 30);
+
 
             // Initialize the player ensuring it doesn't overlap with any block
             players =
             [
-                new Player(gridRows, gridCols, cellSize, blocks, dna, new Player.StartingPos(1,1)),
-                new Player(gridRows, gridCols, cellSize, blocks, dna, new Player.StartingPos(1,1)),
+                new Player(gridRows, gridCols, cellSize, blocks, dna1, new Vector2(1,1)),
+                new Player(gridRows, gridCols, cellSize, blocks, dna2, new Vector2(1,1)),
+                new Player(gridRows, gridCols, cellSize, blocks, dna3, new Vector2(1,1))
+  
+
             ];
         }
 
