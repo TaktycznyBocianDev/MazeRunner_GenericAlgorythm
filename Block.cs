@@ -2,25 +2,34 @@
 
 public class Block
 {
-    public int x; // X position in pixels
-    public int y; // Y position in pixels
-    private int size; // Size of the block
-    private Color color; // Color of the block
+    public int X { get; private set; } // X position in pixels
+    public int Y { get; private set; } // Y position in pixels
+
+    private int size;
+    private Color color;
 
     /// <summary>
-    /// Creates new block - obstacle - on random places. Each block is in unique position.
+    /// Creates a new block (obstacle) and place it at a random, unique position on the grid.
     /// </summary>
-    /// <param name="gridRows"></param>
-    /// <param name="gridCols"></param>
-    /// <param name="cellSize"></param>
-    /// <param name="existingBlocks"></param>
+    /// <param name="gridRows">Number of rows in the grid.</param>
+    /// <param name="gridCols">Number of columns in the grid.</param>
+    /// <param name="cellSize">Size of each cell in pixels.</param>
+    /// <param name="existingBlocks">List of existing blocks to ensure unique positions.</param>
     public Block(int gridRows, int gridCols, int cellSize, List<Block> existingBlocks)
     {
-        // Initialize block's size and color
-        size = cellSize;
-        color = Color.Black;
+        this.size = cellSize;
+        this.color = Color.Black;
+        PlaceInUniquePosition(gridRows, gridCols, existingBlocks);
+    }
 
-        // Ensure that each block is placed in a unique position
+    /// <summary>
+    /// Places the block in a unique position within the grid, avoiding overlap with existing blocks.
+    /// </summary>
+    /// <param name="gridRows">Number of rows in the grid.</param>
+    /// <param name="gridCols">Number of columns in the grid.</param>
+    /// <param name="existingBlocks">List of existing blocks to check for overlaps.</param>
+    private void PlaceInUniquePosition(int gridRows, int gridCols, List<Block> existingBlocks)
+    {
         Random random = new Random();
         bool positionFound = false;
 
@@ -29,31 +38,41 @@ public class Block
             int blockRow = random.Next(0, gridRows);
             int blockCol = random.Next(0, gridCols);
 
-            x = blockCol * cellSize;
-            y = blockRow * cellSize;
+            X = blockCol * size;
+            Y = blockRow * size;
 
-            // Check if this position is already occupied by another block
-            positionFound = true;
-            foreach (var block in existingBlocks)
-            {
-                if (block.x == x && block.y == y)
-                {
-                    positionFound = false;
-                    break;
-                }
-            }
+            positionFound = !existingBlocks.Exists(block => block.IsOccupying(X, Y));
         }
     }
+
+    /// <summary>
+    /// Determines if the block is occupying a specific grid position.
+    /// </summary>
+    /// <param name="targetX">The X position to check.</param>
+    /// <param name="targetY">The Y position to check.</param>
+    /// <returns>True if the block occupies the position, otherwise false.</returns>
     public bool IsOccupying(int targetX, int targetY)
     {
-        return x == targetX && y == targetY;
+        return X == targetX && Y == targetY;
     }
+
+    /// <summary>
+    /// Checks if the block is colliding with a player based on their position and size.
+    /// </summary>
+    /// <param name="playerX">The player's X position.</param>
+    /// <param name="playerY">The player's Y position.</param>
+    /// <param name="playerSize">The player's size.</param>
+    /// <returns>True if the player collides with the block, otherwise false.</returns>
     public bool IsCollidingWithPlayer(int playerX, int playerY, int playerSize)
     {
-        return playerX < x + size && playerX + playerSize > x && playerY < y + size && playerY + playerSize > y;
+        return playerX < X + size && playerX + playerSize > X && playerY < Y + size && playerY + playerSize > Y;
     }
+
+    /// <summary>
+    /// Draws the block on the screen.
+    /// </summary>
     public void Draw()
     {
-        Raylib.DrawRectangle(x, y, size, size, color);
+        Raylib.DrawRectangle(X, Y, size, size, color);
     }
 }
