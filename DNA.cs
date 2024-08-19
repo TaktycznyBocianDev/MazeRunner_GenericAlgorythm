@@ -44,6 +44,7 @@ namespace MazeRunnerGenericAlg
             if (genes.Count > maxDnaLenght) {fitness = int.MaxValue; return; }
             float distance = CalculateDistance(player.GetCurrentPosition().X, player.GetCurrentPosition().Y, target.GetCurrentPosition().X, target.GetCurrentPosition().Y);
             fitness = (int)distance;
+            if (player.victory) fitness += 100; //Penalty for winning, and then escaping (if win occured, there is no more fitness anyway)
         }
 
         /// <summary>
@@ -65,13 +66,18 @@ namespace MazeRunnerGenericAlg
         }
 
         /// <summary>
-        /// Add new gene to dna sequence if dna is no longer than max DNA lenght
+        /// Add new gene to dna sequence 
         /// </summary>
         /// <param name="genePool"></param>
         /// <param name="maxDnaLenght"></param>
         public void ProlongDNA(string genePool, int maxDnaLenght)
         {
-            if (!(genes.Count > maxDnaLenght)) genes.Add(GetRandomCharacter(genePool, new Random()));
+            genes.Add(GetRandomCharacter(genePool, new Random()));
+        }
+
+        public override string ToString()
+        {
+            return new string(genes.ToArray());
         }
 
         private char GetRandomCharacter(string text, Random rng)

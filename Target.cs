@@ -7,6 +7,7 @@ public class Target
     private int y; // Y position in pixels
     private int radius; // Radius of the target
     private Color color; // Color of the target
+    private Vector2 targetPos;
 
     /// <summary>
     /// Creates new target in random place
@@ -40,6 +41,32 @@ public class Target
                 if (block.IsOccupying(x - cellSize / 2, y - cellSize / 2))
                 {
                     positionFound = false;
+                    break;
+                }
+            }
+        }
+    }
+    public Target(int gridRows, int gridCols, int cellSize, List<Block> blocks, Vector2 targetPosition)
+    {
+        // Initialize target's size and color
+        radius = cellSize / 2 - 1; // Slightly smaller than the cell
+        color = Color.Brown;
+        bool positionFound = false;
+
+        while (!positionFound)
+        {
+            x = (int)targetPosition.X * cellSize + cellSize / 2;
+            y = (int)targetPosition.Y * cellSize + cellSize / 2;
+
+            // Check if the position is free of blocks
+            positionFound = true;
+            foreach (var block in blocks)
+            {
+                if (block.IsOccupying(x - cellSize / 2, y - cellSize / 2))
+                {
+                    positionFound = false;
+                    targetPosition.X += 1;
+                    targetPosition.Y += 1;
                     break;
                 }
             }

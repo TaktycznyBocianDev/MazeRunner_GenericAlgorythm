@@ -7,6 +7,7 @@ public class Player
     public DNA playerDNA;
     public Vector2 startingPos;
     public bool endOfMovement;
+    public bool victory;
 
     private int dnaIterator = 0;
     private int x; // X position in pixels
@@ -14,6 +15,8 @@ public class Player
     private int size; // Size of the player
     private Color color; // Color of the player
     private int cellSize; // Size of each grid cell
+
+    public event Action<DNA> OnWin;
 
     /// <summary>
     /// Creates new player with DNA and in concrete position
@@ -29,6 +32,7 @@ public class Player
         playerDNA = dna;
         dnaIterator = 0;
         endOfMovement = false;
+        victory= false;
 
         // Initialize player's size and random color
         size = (int)(cellSize * 0.75);
@@ -85,6 +89,7 @@ public class Player
             if (move == 'S') y += cellSize; // Down
             if (move == 'A') x -= cellSize; // Left
             if (move == 'D') x += cellSize; // Right
+                                            // Space means no movement
 
             // Increment the iterator for the next movement
             dnaIterator++;
@@ -111,17 +116,34 @@ public class Player
         }
 
         // Check collision with target
-        if (target.IsCollidingWithPlayer(x + size / 2, y + size / 2, size))
+        if (target.IsCollidingWithPlayer(x + size / 2, y + size / 2, size) && endOfMovement)
         {
-            Console.WriteLine("You won!"); // Placeholder action
-            // You can trigger a win state here
+            victory = true;
         }      
     }
-    public void Draw()
+
+    public string ToString(int nr)
     {
-        Raylib.DrawRectangle(x, y, size, size, color);
-        // Later, you can replace this with a DrawTexture call if you want to use a PNG texture for the player
+        return $"{nr}. Player with DNA: {playerDNA.ToString()} | Fitness: {playerDNA.fitness.ToString()} | Position - x:{x} y:{y}";
     }
+
+    public void Draw(int number)
+    {
+        // Draw the rectangle
+        Raylib.DrawRectangle(x, y, size, size, color);
+
+        // Convert the number to a string
+        string numberText = number.ToString();
+
+        // Calculate the position to center the text inside the rectangle
+        int textWidth = Raylib.MeasureText(numberText, 20); // 20 is the font size
+        int textX = x + (size - textWidth) / 2; // Center horizontally
+        int textY = y + (size - 20) / 2; // Center vertically, 20 is the font size
+
+        // Draw the number centered on the rectangle
+        Raylib.DrawText(numberText, textX, textY, 20, Color.Black);
+    }
+
     public Vector2 GetCurrentPosition() { return new Vector2(x, y); }
     private static Color GetRandomColor()
     {

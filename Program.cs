@@ -13,112 +13,230 @@ class Program
     /// </summary>
     static void Main()
     {
-        // Initialize the Raylib window
-        int screenWidth = 800;
-        int screenHeight = 800;
-        Raylib.InitWindow(screenWidth, screenHeight, "Kirunia's treat");
+        bool gameStarted = false;
 
-        // Define grid dimensions based on screen size and cell size
-        int cellSize = 50; // Size of each cell
-        int gridRows = screenHeight / cellSize;
-        int gridCols = screenWidth / cellSize;     
+        const string GENEPOOL = "WASD ";
+        const int SCREENWIDTH = 1800;
+        const int SCREENHEIGHT = 900;
+        const int CELLSIZE = 50;
+        const int BLOCKCOUNT = 25;
+        const double MUTATIONRATE = 0.01;
+        const double EVOLUTIONRATE = 0.95;
+        const int MAXPOPULATION = 30;
+        const int MAXGENECOUNT = 350;
+        const int STARTGENECOUNT = 16;
+        const float WAITTIMEINSEC = 0.02f;
+        const float MATERANGE = 1.4f;
+        Vector2 STARTPOSITION = new Vector2(0, 0);
+        Vector2 TARGETPOSITION = new Vector2((SCREENWIDTH - 50)/CELLSIZE, (SCREENHEIGHT - 50)/CELLSIZE);
+        const bool USETARGETPOSITION = true;
 
-        // Initialize blocks, target, and player for the first time
+        int generationsCounter = 1;
+        DNA? victoryDNA;
+        Raylib.InitWindow(SCREENWIDTH, SCREENHEIGHT, "Kirunia's treat");
+
+        int gridRows = SCREENHEIGHT / CELLSIZE;
+        int gridCols = SCREENWIDTH / CELLSIZE;
+
+        // Declare and initialize blocks, target, and players population for the first time
         List<Block> blocks;
         Target target;
-        Player[] players;
-        InitializeGame(out blocks, out target, out players);
+        PlayersPopulation playersPopulation;
 
-        // Function to initialize blocks, target, and player
-        void InitializeGame(out List<Block> blocks, out Target target, out Player[] players)
+
+        InitializeGame(out blocks, out target, out playersPopulation);
+        void InitializeGame(out List<Block> blocks, out Target target, out PlayersPopulation playersPopulation)
         {
             // Create a list to store blocks
             blocks = new List<Block>();
 
             // Number of blocks to create
-            int blockCount = 10;
+            int blockCount = BLOCKCOUNT;
 
             // Initialize blocks
             for (int i = 0; i < blockCount; i++)
             {
-                Block block = new Block(gridRows, gridCols, cellSize, blocks);
+                Block block = new Block(gridRows, gridCols, CELLSIZE, blocks);
                 blocks.Add(block);
             }
 
             // Create a target ensuring it doesn't overlap with any block
-            target = new Target(gridRows, gridCols, cellSize, blocks);
+            if(USETARGETPOSITION)
+            {
+                target = new Target(gridRows, gridCols, CELLSIZE, blocks, TARGETPOSITION);
+            }
+            else
+            {
+                target = new Target(gridRows, gridCols, CELLSIZE, blocks);
+            }
+            
 
-            DNA dna1 = new DNA("ADSW", 10);
-            DNA dna2 = new DNA("ADSW", 15);
-            DNA dna3 = new DNA("ADSW", 30);
+            // Initialize the population object
+            playersPopulation = new PlayersPopulation
+                (target, GENEPOOL, MUTATIONRATE, EVOLUTIONRATE, MAXPOPULATION,
+                MAXGENECOUNT, STARTGENECOUNT, gridRows, gridCols, CELLSIZE, blocks, STARTPOSITION, MATERANGE);
 
 
-            // Initialize the player ensuring it doesn't overlap with any block
-            players =
-            [
-                new Player(gridRows, gridCols, cellSize, blocks, dna1, new Vector2(1,1)),
-                new Player(gridRows, gridCols, cellSize, blocks, dna2, new Vector2(1,1)),
-                new Player(gridRows, gridCols, cellSize, blocks, dna3, new Vector2(1,1))
-  
-
-            ];
         }
+
+        // Function to initialize blocks, target, and player
+        Player winner = new Player(gridRows, gridCols, CELLSIZE, blocks, new DNA(GENEPOOL, STARTGENECOUNT), STARTPOSITION);
+        bool isWinnerSet = false;
+        bool stopDravingPlayers = false;
+
+        playersPopulation.InitializePopulation();
 
         // Main game loop
         while (!Raylib.WindowShouldClose()) // Detect window close button or ESC key
         {
-            // Check for 'R' key press to restart the game
-            if (Raylib.IsKeyPressed(KeyboardKey.R))
-            {
-                InitializeGame(out blocks, out target, out players);
-            }
 
-            // Update player movement
-            foreach(Player player in players)
-            {
-                player.Update(blocks, target, screenWidth, screenHeight);
-            }
-            
-
-            // Start drawing
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.RayWhite);
 
-            // Draw the grid
-            for (int row = 0; row < gridRows; row++)
+            if (Raylib.IsMouseButtonPressed(MouseButton.Left))
             {
-                for (int col = 0; col < gridCols; col++)
+
+                gameStarted = true;
+
+            }
+
+            if (gameStarted)
+            {
+                // Check for 'R' key press to restart the game
+                if (Raylib.IsKeyPressed(KeyboardKey.R))
                 {
-                    // Calculate the position of each cell
-                    int x = col * cellSize;
-                    int y = row * cellSize;
-
-                    // Draw the cell as a white square with a black border
-                    Raylib.DrawRectangle(x, y, cellSize, cellSize, Color.White);
-                    Raylib.DrawRectangleLines(x, y, cellSize, cellSize, Color.Black);
+                    InitializeGame(out blocks, out target, out playersPopulation);
+                    playersPopulation.InitializePopulation();
+                    isWinnerSet = false;
+                    stopDravingPlayers = false;
+                    generationsCounter = 1;
                 }
-            }
 
-            // Draw the blocks
-            foreach (var block in blocks)
+                foreach (Player player in playersPopulation.population)
+                {
+                    player.Update(blocks, target, SCREENWIDTH, SCREENHEIGHT);
+                }
+
+                // Draw the grid
+                for (int row = 0; row < gridRows; row++)
+                {
+                    for (int col = 0; col < gridCols; col++)
+                    {
+                        // Calculate the position of each cell
+                        int x = col * CELLSIZE;
+                        int y = row * CELLSIZE;
+
+                        // Draw the cell as a white square with a black border
+                        Raylib.DrawRectangle(x, y, CELLSIZE, CELLSIZE, Color.White);
+                        Raylib.DrawRectangleLines(x, y, CELLSIZE, CELLSIZE, Color.Black);
+                    }
+                }
+
+                // Draw the blocks
+                foreach (var block in blocks)
+                {
+                    block.Draw();
+                }
+
+                // Draw the target
+                target.Draw();
+
+                if (!stopDravingPlayers)
+                {
+                    // Draw the player
+                    for (int i = 0; i < playersPopulation.population.Length; i++)
+                    {
+                        Player player = playersPopulation.population[i];
+                        player.Draw(i);
+                    }
+                }
+
+
+                if (playersPopulation.IsMovementFinished())
+                {
+                    playersPopulation.SetFitnessForEachPlayer();
+                    playersPopulation.SelectTheFittest();
+
+                    if (!playersPopulation.CheckVictory(out victoryDNA))
+                    {
+
+                        DescribePop(playersPopulation, generationsCounter);
+                        playersPopulation.CreateNewGeneration();
+                        generationsCounter++;
+                    }
+                    else
+                    {
+                        if (!isWinnerSet)
+                        {
+                            winner = new Player(gridRows, gridCols, CELLSIZE, blocks, victoryDNA, STARTPOSITION);
+                            isWinnerSet = true;
+                            stopDravingPlayers = true;
+                            winner.victory = false;
+                        }
+                        else
+                        {
+                            winner.Update(blocks, target, SCREENWIDTH, SCREENHEIGHT);
+                            winner.Draw(0);
+                            if (winner.victory) isWinnerSet = false;
+                            Raylib.WaitTime(WAITTIMEINSEC);
+                        }
+                        DrawInfo(winner.playerDNA, generationsCounter);
+
+                    }
+
+                }
+                Raylib.WaitTime(WAITTIMEINSEC);
+
+                
+            }
+            else
             {
-                block.Draw();
+                int screenPadding = 10;
+                int fontSize = 20;
+                Raylib.DrawText("Left click mouse button to start.", screenPadding, screenPadding, fontSize, Color.Blue);
             }
 
-            // Draw the target
-            target.Draw();
-
-            // Draw the player
-            foreach (Player player in players)
-            {
-                player.Draw();
-            }
-            
-            // End drawing
             Raylib.EndDrawing();
         }
-
-        // De-initialize Raylib window
         Raylib.CloseWindow();
     }
+
+    static void DescribePop(PlayersPopulation playersPopulation, int generationsCounter)
+    {
+        int bestFitness = 0;
+        int averageFitness = 0;
+        int averageDnaLenght = 0;
+        for (int i = 0; i < playersPopulation.population.Length; i++)
+        {
+            Player player = playersPopulation.population[i];
+            Console.WriteLine(player.ToString(i));
+            averageFitness += player.playerDNA.fitness;
+            averageDnaLenght += player.playerDNA.genes.Count;
+
+            if (bestFitness == 0)
+            {
+                bestFitness = player.playerDNA.fitness;
+            }
+            if (bestFitness != 0 && player.playerDNA.fitness < bestFitness)
+            {
+                bestFitness = player.playerDNA.fitness;
+            }
+        }
+        averageFitness /= playersPopulation.population.Length;
+        averageDnaLenght /= playersPopulation.population.Length;
+        Console.WriteLine("Current generation: " + generationsCounter.ToString());
+        Console.WriteLine("Best fitness: " + bestFitness.ToString());
+        Console.WriteLine("Average fitness: " + averageFitness.ToString());
+        Console.WriteLine("Average DNA lenght: " + averageDnaLenght.ToString());
+    }
+
+    static public void DrawInfo(DNA bestDNA, int generationsCounter)
+    {
+        int screenPadding = 10;
+        int fontSize = 20;
+        int lineHeight = 25;
+        Raylib.DrawText("Current generation: " + (generationsCounter - 1).ToString(), screenPadding, screenPadding, fontSize, Color.Blue);
+        Raylib.DrawText("Winner DNA: " + new string(bestDNA.genes.ToArray()), screenPadding, screenPadding + lineHeight, fontSize, Color.Green);
+    }
+
 }

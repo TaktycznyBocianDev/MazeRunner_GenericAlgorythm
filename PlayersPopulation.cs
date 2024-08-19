@@ -12,6 +12,8 @@ namespace MazeRunnerGenericAlg
 
         public Player[] population;
         public List<Player> matingPool;
+        public bool victory = false;
+        public DNA victoryDNA;
 
         Target target;
         private string genePool;
@@ -24,8 +26,8 @@ namespace MazeRunnerGenericAlg
         private int gridCols;
         private int cellSize;
         private List<Block> blocks;
-        private DNA dna;
         private Vector2 startingPos;
+        private float mateRange;
 
         /// <summary>
         /// Allows to create full initial and later generations. Will be good to remove some params, but it is what it is. 
@@ -43,7 +45,7 @@ namespace MazeRunnerGenericAlg
         /// <param name="blocks"></param>
         /// <param name="dna"></param>
         /// <param name="startingPos"></param>
-        public PlayersPopulation(Target target, string genePool, double mutationRate, double evoRate, int maxPopulation, int maxGenesCount, int startGenesCount, int gridRows, int gridCols, int cellSize, List<Block> blocks, DNA dna, Vector2 startingPos)
+        public PlayersPopulation(Target target, string genePool, double mutationRate, double evoRate, int maxPopulation, int maxGenesCount, int startGenesCount, int gridRows, int gridCols, int cellSize, List<Block> blocks, Vector2 startingPos, float mateRange)
         {
             this.evoRate = evoRate;
             this.target = target;
@@ -56,11 +58,12 @@ namespace MazeRunnerGenericAlg
             this.gridCols = gridCols;
             this.cellSize = cellSize;
             this.blocks = blocks;
-            this.dna = dna;
             this.startingPos = startingPos;
-
             this.population = new Player[this.maxPopulation];
             this.matingPool = new List<Player>();
+           
+            if (mateRange <= 1) mateRange = 1.1f;
+            this.mateRange = mateRange;
         }
 
         /// <summary>
@@ -70,9 +73,10 @@ namespace MazeRunnerGenericAlg
         {
             for (int i = 0; i < maxPopulation; i++)
             {
-                population[i] = new Player(gridRows, gridCols, cellSize, blocks, new DNA(genePool, startGenesCount), startingPos);
+                population[i] = new Player(gridRows, gridCols, cellSize, blocks, new DNA(genePool, startGenesCount), startingPos);               
             }
         }
+
 
         /// <summary>
         /// For each player calculates fitness for it's DNA with proper function from DNA class.
@@ -121,32 +125,35 @@ namespace MazeRunnerGenericAlg
         public DNA CrossMutationDNA()
         {
             Random rnd = new Random();
-            Player parentUno = matingPool[rnd.Next(matingPool.Count())];
-            Player parentDos = matingPool[rnd.Next(matingPool.Count())];
+            Player parentUno = matingPool[rnd.Next(matingPool.Count)];
+            Player parentDos = matingPool[rnd.Next(matingPool.Count)];
+            Player parentTres = matingPool[rnd.Next(matingPool.Count)];
+            Player parentQuatro = matingPool[rnd.Next(matingPool.Count)];
 
-            int countUno = parentUno.playerDNA.genes.Count / 2;
-            int countDos = parentDos.playerDNA.genes.Count / 2;
+            int countUno = parentUno.playerDNA.genes.Count / 4;
+            int countDos = parentDos.playerDNA.genes.Count / 4;
+            int countTres = parentTres.playerDNA.genes.Count / 4;
+            int countQuatro = parentQuatro.playerDNA.genes.Count / 4;
 
-            List<char> firsSequence = new List<char>();
-            List<char> secondSequence = new List<char>();
+            List<char> finalSequence = new List<char>();
 
-            for (int i = 0; i < countUno; i++)
-            {
-                firsSequence.Add(parentUno.playerDNA.genes[i]);
-            }
-            for (int i = 0; i < countDos; i++)
-            {
-                secondSequence.Add(parentDos.playerDNA.genes[i]);
-            }
+            finalSequence.AddRange(parentUno.playerDNA.genes.Take(countUno));
 
-            List<char> finalSequence = [.. firsSequence, .. firsSequence];
+            finalSequence.AddRange(parentDos.playerDNA.genes.Skip(countDos).Take(countDos));
+
+            finalSequence.AddRange(parentTres.playerDNA.genes.Skip(2 * countTres).Take(countTres));
+
+            finalSequence.AddRange(parentQuatro.playerDNA.genes.Skip(3 * countQuatro).Take(countQuatro));
 
             DNA newDNA = new DNA(finalSequence);
             newDNA.Mutate(mutationRate, genePool, new Random());
 
-            if (rnd.NextDouble() < evoRate)
+            if (rnd.NextDouble() <= evoRate)
             {
-                newDNA.ProlongDNA(genePool, maxGenesCount);
+                for (int i = 0; i < 4; i++)
+                {
+                    newDNA.ProlongDNA(genePool, maxGenesCount);
+                }             
             }
 
             return newDNA;
@@ -170,15 +177,74 @@ namespace MazeRunnerGenericAlg
         /// Checks all players and return false if any of them still have movements
         /// </summary>
         /// <returns></returns>
-        public bool HasAnyPlayerMovementLeft()
+        public bool IsMovementFinished()
+        {
+            int tmp = 0; //I assume there is still movement, so there are no finished players
+            foreach (Player player in population)
+            {
+                if (player.endOfMovement) tmp++; //For each player that ends movement, add one more to counter
+            }
+            if (tmp != population.Length) return false; //If any player still moves, return false, as movement is not finished.
+            return true; //if all ends
+        }
+
+        /// <summary>
+        /// Checks if any of Players gets to target
+        /// </summary>
+        /// <param name="dna"></param>
+        /// <returns>true if any player wins</returns>
+        public bool CheckVictory(out DNA? dna)
         {
             foreach (Player player in population)
             {
-                if (player.endOfMovement) return false;
+                if (player.victory)
+                {
+                    dna = player.playerDNA;
+                    return true;
+                }
+                    
             }
-            return true;
+            dna = null;
+            return false;
         }
 
+        public float CalcAvrFitness()
+        {
+            float tmp = 0;
+            foreach (Player player in population)
+            {
+                tmp += player.playerDNA.fitness;
+            }
+            return tmp / population.Length;
+
+        }
+
+        public float CalcAvrDNALenght()
+        {
+            float tmp = 0;
+            foreach (Player player in population)
+            {
+                tmp += player.playerDNA.genes.Count;
+            }
+            return tmp / population.Length;
+        }
+
+        public int GetBestFitness()
+        {
+            int bestFitness = 0;
+            foreach(Player player in population)
+            {
+                if (bestFitness == 0)
+                {
+                    bestFitness = player.playerDNA.fitness;
+                }
+                if (bestFitness != 0 && player.playerDNA.fitness < bestFitness)
+                {
+                    bestFitness = player.playerDNA.fitness;
+                }
+            }
+            return bestFitness;
+        }
 
     }
 }
