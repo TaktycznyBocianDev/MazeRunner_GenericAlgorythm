@@ -179,14 +179,14 @@ public class Player
     /// <param name="currentDistance">Calculated after movement</param>
     private void SetDistanceGain(int previousDistance, int currentDistance)
     {
-        if (previousDistance == currentDistance) DistanceGain += 0;
+        if (previousDistance == currentDistance) DistanceGain += 100;
         if (previousDistance > currentDistance)
         {
-            DistanceGain += -(previousDistance - currentDistance) * 2;
+            DistanceGain += -(previousDistance - currentDistance) * 5;
         }
         if (previousDistance < currentDistance)
         {
-            DistanceGain += -(previousDistance - currentDistance) * 100;
+            DistanceGain += -(previousDistance - currentDistance) * 10;
         }
     }
 

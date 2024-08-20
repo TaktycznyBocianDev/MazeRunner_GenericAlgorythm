@@ -16,20 +16,21 @@ class Program
         bool gameStarted = false;
 
         const string GENEPOOL = "WASD ";
-        const int SCREENWIDTH = 1800;
-        const int SCREENHEIGHT = 900;
-        const int CELLSIZE = 50;
-        const int BLOCKCOUNT = 10;
+        const int SCREENWIDTH = 860;
+        const int SCREENHEIGHT = 860;
+        const int CELLSIZE = 20;
+        const int BLOCKCOUNT = 30;
         const double MUTATIONRATE = 0.01;
         const double EVOLUTIONRATE = 0.95;
-        const int MAXPOPULATION = 20;
+        const int MAXPOPULATION = 40;
         const int MAXGENECOUNT = 2000;
-        const int STARTGENECOUNT = 16;
-        const float MATERANGE = 1.7f;
-        const float WAITTIMEINSEC = 0.01f;
+        const int STARTGENECOUNT = 5;
+        const float MATERANGE = 1.05f;
+        const float WAITTIMEINSEC = 0.03f;
         Vector2 STARTPOSITION = new Vector2(0, 0);
         Vector2 TARGETPOSITION = new Vector2((SCREENWIDTH - 50)/CELLSIZE, (SCREENHEIGHT - 50)/CELLSIZE);
         const bool USETARGETPOSITION = true;
+        const int DNAPROLOGNATIONRATE = 5;
 
         int generationsCounter = 1;
         DNA? victoryDNA;
@@ -74,7 +75,7 @@ class Program
             // Initialize the population object
             playersPopulation = new PlayersPopulation
                 (target, GENEPOOL, MUTATIONRATE, EVOLUTIONRATE, MAXPOPULATION,
-                MAXGENECOUNT, STARTGENECOUNT, gridRows, gridCols, CELLSIZE, blocks, STARTPOSITION, MATERANGE);
+                MAXGENECOUNT, STARTGENECOUNT, gridRows, gridCols, CELLSIZE, blocks, STARTPOSITION, MATERANGE, DNAPROLOGNATIONRATE);
 
 
         }
@@ -178,7 +179,7 @@ class Program
                             winner.Update(blocks, target, SCREENWIDTH, SCREENHEIGHT);
                             winner.Draw(0);
                             if (winner.Victory) isWinnerSet = false;
-                            Raylib.WaitTime(WAITTIMEINSEC);
+                            Raylib.WaitTime(WAITTIMEINSEC + 0.1);
                         }
                         DrawInfo(winner.PlayerDNA, generationsCounter);
 

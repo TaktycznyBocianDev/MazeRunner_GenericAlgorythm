@@ -28,6 +28,7 @@ namespace MazeRunnerGenericAlg
         private List<Block> blocks;
         private Vector2 startingPos;
         private float mateRange;
+        private int DnaProlongationRate;
 
         /// <summary>
         /// Allows to create full initial and later generations. Will be good to remove some params, but it is what it is. 
@@ -45,7 +46,7 @@ namespace MazeRunnerGenericAlg
         /// <param name="blocks"></param>
         /// <param name="dna"></param>
         /// <param name="startingPos"></param>
-        public PlayersPopulation(Target target, string genePool, double mutationRate, double evoRate, int maxPopulation, int maxGenesCount, int startGenesCount, int gridRows, int gridCols, int cellSize, List<Block> blocks, Vector2 startingPos, float mateRange)
+        public PlayersPopulation(Target target, string genePool, double mutationRate, double evoRate, int maxPopulation, int maxGenesCount, int startGenesCount, int gridRows, int gridCols, int cellSize, List<Block> blocks, Vector2 startingPos, float mateRange, int DnaProlongationRate)
         {
             this.evoRate = evoRate;
             this.target = target;
@@ -64,6 +65,7 @@ namespace MazeRunnerGenericAlg
            
             if (mateRange <= 1) mateRange = 1.1f;
             this.mateRange = mateRange;
+            this.DnaProlongationRate = DnaProlongationRate;
         }
 
         /// <summary>
@@ -150,7 +152,7 @@ namespace MazeRunnerGenericAlg
 
             if (rnd.NextDouble() <= evoRate)
             {
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < DnaProlongationRate; i++)
                 {
                     newDNA.ProlongDNA(genePool, maxGenesCount);
                 }             
